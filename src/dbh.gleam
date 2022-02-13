@@ -1,9 +1,10 @@
 import dbh/model
+import dbh/query
 import gleam/io
 import gleam/option
 
 const user = model.Model(
-  table: "user",
+  table: "users",
   fields: [
     #(
       "pk",
@@ -25,8 +26,15 @@ const user = model.Model(
 )
 
 pub fn main() {
+  io.println("-- create")
   user
-  |> io.debug
   |> model.serialize
-  |> io.print
+  |> io.println
+  io.println("-- query")
+  let #(query, params) =
+    user
+    |> query.get([#("pk", query.Eq, query.Int(3))])
+    |> query.serialize
+  io.println(query)
+  io.debug(params)
 }
