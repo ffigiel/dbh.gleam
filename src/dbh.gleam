@@ -22,6 +22,10 @@ const user = model.Model(
         default: option.Some("now()"),
       ),
     ),
+    #(
+      "wants_newsletter",
+      model.Bool(index: model.NoIndex, null: False, default: option.Some(False)),
+    ),
   ],
 )
 

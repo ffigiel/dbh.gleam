@@ -11,6 +11,7 @@ pub type Field {
   BigInt(index: Index, null: Bool, default: option.Option(Int))
   Text(index: Index, null: Bool, default: option.Option(String))
   TimestampTz(index: Index, null: Bool, default: option.Option(String))
+  Bool(index: Index, null: Bool, default: option.Option(Bool))
 }
 
 pub type Index {
@@ -49,6 +50,7 @@ fn serialize_field(ff: #(String, Field)) -> String {
       BigInt(_, _, _) -> serialize_big_int_field(f)
       Text(_, _, _) -> serialize_text_field(f)
       TimestampTz(_, _, _) -> serialize_timestamp_tz_field(f)
+      Bool(_, _, _) -> serialize_bool_field(f)
     },
   ]
   parts
@@ -97,6 +99,19 @@ fn serialize_timestamp_tz_field(f: Field) -> String {
   |> string.join(" ")
 }
 
+fn serialize_bool_field(f: Field) -> String {
+  assert Bool(index, null, default) = f
+  let parts = [
+    "bool",
+    serialize_index(index),
+    serialize_null(null),
+    serialize_default_bool(default),
+  ]
+  parts
+  |> list.filter(string_not_empty)
+  |> string.join(" ")
+}
+
 // FIELD TAGS
 fn serialize_index(index: Index) -> String {
   case index {
@@ -127,6 +142,14 @@ fn serialize_default_string(default: option.Option(String)) -> String {
   }
 }
 
+fn serialize_default_bool(default: option.Option(Bool)) -> String {
+  case default {
+    option.Some(True) -> "default true"
+    option.Some(False) -> "default false"
+    option.None -> ""
+  }
+}
+
 fn string_not_empty(s: String) -> Bool {
   s != ""
 }
@@ -144,6 +167,7 @@ fn serialize_field_index(table: String, ff: #(String, Field)) -> String {
     BigInt(_, _, index: index) -> index == Index
     Text(_, _, index: index) -> index == Index
     TimestampTz(_, _, index: index) -> index == Index
+    Bool(_, _, index: index) -> index == Index
   }
   case has_index {
     False -> ""
