@@ -7,32 +7,18 @@ const user = model.Model(
   fields: [
     #(
       "pk",
-      model.BigIntField(
-        model.BigIntFieldSpec(
-          index: model.PrimaryKey,
-          null: False,
-          default: option.None,
-        ),
-      ),
+      model.BigInt(index: model.PrimaryKey, null: False, default: option.None),
     ),
     #(
       "email",
-      model.TextField(
-        model.TextFieldSpec(
-          index: model.Unique,
-          null: False,
-          default: option.None,
-        ),
-      ),
+      model.Text(index: model.Unique, null: False, default: option.None),
     ),
     #(
       "created_on",
-      model.TimestampTzField(
-        model.TimestampTzFieldSpec(
-          index: model.Index,
-          null: False,
-          default: option.Some("now()"),
-        ),
+      model.TimestampTz(
+        index: model.Index,
+        null: False,
+        default: option.Some("now()"),
       ),
     ),
   ],

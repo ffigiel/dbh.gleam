@@ -8,21 +8,9 @@ pub type Model {
 }
 
 pub type Field {
-  BigIntField(BigIntFieldSpec)
-  TextField(TextFieldSpec)
-  TimestampTzField(TimestampTzFieldSpec)
-}
-
-pub type BigIntFieldSpec {
-  BigIntFieldSpec(index: Index, null: Bool, default: option.Option(Int))
-}
-
-pub type TextFieldSpec {
-  TextFieldSpec(index: Index, null: Bool, default: option.Option(String))
-}
-
-pub type TimestampTzFieldSpec {
-  TimestampTzFieldSpec(index: Index, null: Bool, default: option.Option(String))
+  BigInt(index: Index, null: Bool, default: option.Option(Int))
+  Text(index: Index, null: Bool, default: option.Option(String))
+  TimestampTz(index: Index, null: Bool, default: option.Option(String))
 }
 
 pub type Index {
@@ -56,27 +44,28 @@ fn serialize_field(ff: #(String, Field)) -> String {
   let parts = [
     name,
     case f {
-      BigIntField(bif) -> serialize_big_int_field(bif)
-      TextField(tf) -> serialize_text_field(tf)
-      TimestampTzField(ttf) -> serialize_timestamp_tz_field(ttf)
+      BigInt(_, _, _) -> serialize_big_int_field(f)
+      Text(_, _, _) -> serialize_text_field(f)
+      TimestampTz(_, _, _) -> serialize_timestamp_tz_field(f)
     },
   ]
   parts
   |> string.join(" ")
 }
 
-fn serialize_big_int_field(f: BigIntFieldSpec) -> String {
+fn serialize_big_int_field(f: Field) -> String {
+  assert BigInt(index, null, default) = f
   let parts = [
-    case f.index {
+    case index {
       PrimaryKey -> "bigserial primary key"
       Unique -> "bigint unique"
       _ -> "bigint"
     },
-    case f.null {
+    case null {
       True -> ""
       False -> "not null"
     },
-    case f.default {
+    case default {
       option.Some(d) -> string.concat(["default ", int.to_string(d)])
       option.None -> ""
     },
@@ -86,19 +75,20 @@ fn serialize_big_int_field(f: BigIntFieldSpec) -> String {
   |> string.join(" ")
 }
 
-fn serialize_text_field(f: TextFieldSpec) -> String {
+fn serialize_text_field(f: Field) -> String {
+  assert Text(index, null, default) = f
   let parts = [
     "text",
-    case f.index {
+    case index {
       PrimaryKey -> "primary key"
       Unique -> "unique"
       _ -> ""
     },
-    case f.null {
+    case null {
       True -> ""
       False -> "not null"
     },
-    case f.default {
+    case default {
       option.Some(d) -> string.concat(["default ", d])
       option.None -> ""
     },
@@ -108,19 +98,20 @@ fn serialize_text_field(f: TextFieldSpec) -> String {
   |> string.join(" ")
 }
 
-fn serialize_timestamp_tz_field(f: TimestampTzFieldSpec) -> String {
+fn serialize_timestamp_tz_field(f: Field) -> String {
+  assert TimestampTz(index, null, default) = f
   let parts = [
     "timestamp with time zone",
-    case f.index {
+    case index {
       PrimaryKey -> "primary key"
       Unique -> "unique"
       _ -> ""
     },
-    case f.null {
+    case null {
       True -> ""
       False -> "not null"
     },
-    case f.default {
+    case default {
       option.Some(d) -> string.concat(["default ", d])
       option.None -> ""
     },
@@ -143,9 +134,9 @@ fn serialize_fields_indexes(m: Model) -> String {
 fn serialize_field_index(table: String, ff: #(String, Field)) -> String {
   let #(name, f) = ff
   let has_index = case f {
-    BigIntField(bif) -> bif.index == Index
-    TextField(tf) -> tf.index == Index
-    TimestampTzField(ttf) -> ttf.index == Index
+    BigInt(_, _, index: index) -> index == Index
+    Text(_, _, index: index) -> index == Index
+    TimestampTz(_, _, index: index) -> index == Index
   }
   case has_index {
     False -> ""
