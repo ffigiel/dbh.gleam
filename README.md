@@ -1,6 +1,6 @@
 # dbh
 
-A Gleam project
+Experimenting with database models
 
 ## Quick start
 
