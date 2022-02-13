@@ -20,6 +20,7 @@ pub type Index {
   PrimaryKey
 }
 
+// CREATE TABLE
 pub fn serialize(m: Model) -> String {
   let parts = [
     "create table ",
@@ -39,6 +40,7 @@ fn serialize_fields(fs: List(#(String, Field))) -> String {
   |> string.join("\n  , ")
 }
 
+// FIELDS
 fn serialize_field(ff: #(String, Field)) -> String {
   let #(name, f) = ff
   let parts = [
@@ -57,18 +59,12 @@ fn serialize_big_int_field(f: Field) -> String {
   assert BigInt(index, null, default) = f
   let parts = [
     case index {
-      PrimaryKey -> "bigserial primary key"
-      Unique -> "bigint unique"
+      PrimaryKey -> "bigserial"
       _ -> "bigint"
     },
-    case null {
-      True -> ""
-      False -> "not null"
-    },
-    case default {
-      option.Some(d) -> string.concat(["default ", int.to_string(d)])
-      option.None -> ""
-    },
+    serialize_index(index),
+    serialize_null(null),
+    serialize_default_int(default),
   ]
   parts
   |> list.filter(string_not_empty)
@@ -79,19 +75,9 @@ fn serialize_text_field(f: Field) -> String {
   assert Text(index, null, default) = f
   let parts = [
     "text",
-    case index {
-      PrimaryKey -> "primary key"
-      Unique -> "unique"
-      _ -> ""
-    },
-    case null {
-      True -> ""
-      False -> "not null"
-    },
-    case default {
-      option.Some(d) -> string.concat(["default ", d])
-      option.None -> ""
-    },
+    serialize_index(index),
+    serialize_null(null),
+    serialize_default_string(default),
   ]
   parts
   |> list.filter(string_not_empty)
@@ -102,29 +88,50 @@ fn serialize_timestamp_tz_field(f: Field) -> String {
   assert TimestampTz(index, null, default) = f
   let parts = [
     "timestamp with time zone",
-    case index {
-      PrimaryKey -> "primary key"
-      Unique -> "unique"
-      _ -> ""
-    },
-    case null {
-      True -> ""
-      False -> "not null"
-    },
-    case default {
-      option.Some(d) -> string.concat(["default ", d])
-      option.None -> ""
-    },
+    serialize_index(index),
+    serialize_null(null),
+    serialize_default_string(default),
   ]
   parts
   |> list.filter(string_not_empty)
   |> string.join(" ")
 }
 
+// FIELD TAGS
+fn serialize_index(index: Index) -> String {
+  case index {
+    PrimaryKey -> "primary key"
+    Unique -> "unique"
+    _ -> ""
+  }
+}
+
+fn serialize_null(null: Bool) -> String {
+  case null {
+    True -> ""
+    False -> "not null"
+  }
+}
+
+fn serialize_default_int(default: option.Option(Int)) -> String {
+  case default {
+    option.Some(d) -> string.concat(["default ", int.to_string(d)])
+    option.None -> ""
+  }
+}
+
+fn serialize_default_string(default: option.Option(String)) -> String {
+  case default {
+    option.Some(d) -> string.concat(["default ", d])
+    option.None -> ""
+  }
+}
+
 fn string_not_empty(s: String) -> Bool {
   s != ""
 }
 
+// CREATE INDEX
 fn serialize_fields_indexes(m: Model) -> String {
   list.map(m.fields, serialize_field_index(m.table, _))
   |> list.filter(string_not_empty)
