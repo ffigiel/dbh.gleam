@@ -39,6 +39,8 @@ pub fn serialize(m: Model) -> String {
     "\n  ( ",
     serialize_fields(m.fields),
     "\n  );",
+    "\n",
+    serialize_fields_indexes(m),
   ]
   parts
   |> string.join("")
@@ -130,4 +132,23 @@ fn serialize_timestamp_tz_field(f: TimestampTzFieldSpec) -> String {
 
 fn string_not_empty(s: String) -> Bool {
   s != ""
+}
+
+fn serialize_fields_indexes(m: Model) -> String {
+  list.map(m.fields, serialize_field_index(m.table, _))
+  |> list.filter(string_not_empty)
+  |> string.join("\n")
+}
+
+fn serialize_field_index(table: String, ff: #(String, Field)) -> String {
+  let #(name, f) = ff
+  let has_index = case f {
+    BigIntField(bif) -> bif.index == Index
+    TextField(tf) -> tf.index == Index
+    TimestampTzField(ttf) -> ttf.index == Index
+  }
+  case has_index {
+    False -> ""
+    True -> string.concat(["create index on ", table, " (", name, ");"])
+  }
 }
