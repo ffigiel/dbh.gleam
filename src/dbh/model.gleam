@@ -10,6 +10,7 @@ pub type Model {
 pub type Field {
   BigIntField(BigIntFieldSpec)
   TextField(TextFieldSpec)
+  TimestampTzField(TimestampTzFieldSpec)
 }
 
 pub type BigIntFieldSpec {
@@ -18,6 +19,10 @@ pub type BigIntFieldSpec {
 
 pub type TextFieldSpec {
   TextFieldSpec(index: Index, null: Bool, default: option.Option(String))
+}
+
+pub type TimestampTzFieldSpec {
+  TimestampTzFieldSpec(index: Index, null: Bool, default: option.Option(String))
 }
 
 pub type Index {
@@ -51,6 +56,7 @@ fn serialize_field(ff: #(String, Field)) -> String {
     case f {
       BigIntField(bif) -> serialize_big_int_field(bif)
       TextField(tf) -> serialize_text_field(tf)
+      TimestampTzField(ttf) -> serialize_timestamp_tz_field(ttf)
     },
   ]
   parts
@@ -81,6 +87,28 @@ fn serialize_big_int_field(f: BigIntFieldSpec) -> String {
 fn serialize_text_field(f: TextFieldSpec) -> String {
   let parts = [
     "text",
+    case f.index {
+      PrimaryKey -> "primary key"
+      Unique -> "unique"
+      _ -> ""
+    },
+    case f.null {
+      True -> ""
+      False -> "not null"
+    },
+    case f.default {
+      option.Some(d) -> string.concat(["default ", d])
+      option.None -> ""
+    },
+  ]
+  parts
+  |> list.filter(string_not_empty)
+  |> string.join(" ")
+}
+
+fn serialize_timestamp_tz_field(f: TimestampTzFieldSpec) -> String {
+  let parts = [
+    "timestamp with time zone",
     case f.index {
       PrimaryKey -> "primary key"
       Unique -> "unique"

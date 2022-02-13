@@ -25,6 +25,16 @@ const user = model.Model(
         ),
       ),
     ),
+    #(
+      "created_on",
+      model.TimestampTzField(
+        model.TimestampTzFieldSpec(
+          index: model.Index,
+          null: False,
+          default: option.Some("now()"),
+        ),
+      ),
+    ),
   ],
 )
 
