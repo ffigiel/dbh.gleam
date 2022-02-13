@@ -4,14 +4,19 @@ import gleam/list
 import gleam/int
 
 pub type Model {
-  Model(table: String, fields: List(#(String, Field)))
+  Model(table: String, fields: List(Field))
 }
 
 pub type Field {
-  BigInt(index: Index, null: Bool, default: option.Option(Int))
-  Text(index: Index, null: Bool, default: option.Option(String))
-  TimestampTz(index: Index, null: Bool, default: option.Option(String))
-  Bool(index: Index, null: Bool, default: option.Option(Bool))
+  BigInt(col: String, index: Index, null: Bool, default: option.Option(Int))
+  Text(col: String, index: Index, null: Bool, default: option.Option(String))
+  TimestampTz(
+    col: String,
+    index: Index,
+    null: Bool,
+    default: option.Option(String),
+  )
+  Bool(col: String, index: Index, null: Bool, default: option.Option(Bool))
 }
 
 pub type Index {
@@ -36,29 +41,37 @@ pub fn serialize(m: Model) -> String {
   |> string.join("")
 }
 
-fn serialize_fields(fs: List(#(String, Field))) -> String {
+fn serialize_fields(fs: List(Field)) -> String {
   list.map(fs, serialize_field)
   |> string.join("\n  , ")
 }
 
 // FIELDS
-fn serialize_field(ff: #(String, Field)) -> String {
-  let #(name, f) = ff
+fn serialize_field(f: Field) -> String {
   let parts = [
-    name,
+    serialize_field_col(f),
     case f {
-      BigInt(_, _, _) -> serialize_big_int_field(f)
-      Text(_, _, _) -> serialize_text_field(f)
-      TimestampTz(_, _, _) -> serialize_timestamp_tz_field(f)
-      Bool(_, _, _) -> serialize_bool_field(f)
+      BigInt(_, _, _, _) -> serialize_big_int_field(f)
+      Text(_, _, _, _) -> serialize_text_field(f)
+      TimestampTz(_, _, _, _) -> serialize_timestamp_tz_field(f)
+      Bool(_, _, _, _) -> serialize_bool_field(f)
     },
   ]
   parts
   |> string.join(" ")
 }
 
+fn serialize_field_col(f: Field) -> String {
+  case f {
+    BigInt(_, _, _, col: col) -> col
+    Text(_, _, _, col: col) -> col
+    TimestampTz(_, _, _, col: col) -> col
+    Bool(_, _, _, col: col) -> col
+  }
+}
+
 fn serialize_big_int_field(f: Field) -> String {
-  assert BigInt(index, null, default) = f
+  assert BigInt(_, index, null, default) = f
   let parts = [
     case index {
       PrimaryKey -> "bigserial"
@@ -74,7 +87,7 @@ fn serialize_big_int_field(f: Field) -> String {
 }
 
 fn serialize_text_field(f: Field) -> String {
-  assert Text(index, null, default) = f
+  assert Text(_, index, null, default) = f
   let parts = [
     "text",
     serialize_index(index),
@@ -87,7 +100,7 @@ fn serialize_text_field(f: Field) -> String {
 }
 
 fn serialize_timestamp_tz_field(f: Field) -> String {
-  assert TimestampTz(index, null, default) = f
+  assert TimestampTz(_, index, null, default) = f
   let parts = [
     "timestamp with time zone",
     serialize_index(index),
@@ -100,7 +113,7 @@ fn serialize_timestamp_tz_field(f: Field) -> String {
 }
 
 fn serialize_bool_field(f: Field) -> String {
-  assert Bool(index, null, default) = f
+  assert Bool(_, index, null, default) = f
   let parts = [
     "bool",
     serialize_index(index),
@@ -161,16 +174,16 @@ fn serialize_fields_indexes(m: Model) -> String {
   |> string.join("\n")
 }
 
-fn serialize_field_index(table: String, ff: #(String, Field)) -> String {
-  let #(name, f) = ff
+fn serialize_field_index(table: String, f: Field) -> String {
+  let col = serialize_field_col(f)
   let has_index = case f {
-    BigInt(_, _, index: index) -> index == Index
-    Text(_, _, index: index) -> index == Index
-    TimestampTz(_, _, index: index) -> index == Index
-    Bool(_, _, index: index) -> index == Index
+    BigInt(_, _, _, index: index) -> index == Index
+    Text(_, _, _, index: index) -> index == Index
+    TimestampTz(_, _, _, index: index) -> index == Index
+    Bool(_, _, _, index: index) -> index == Index
   }
   case has_index {
     False -> ""
-    True -> string.concat(["create index on ", table, " (", name, ");"])
+    True -> string.concat(["create index on ", table, " (", col, ");"])
   }
 }

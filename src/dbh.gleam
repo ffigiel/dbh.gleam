@@ -6,25 +6,29 @@ import gleam/option
 const user = model.Model(
   table: "users",
   fields: [
-    #(
-      "pk",
-      model.BigInt(index: model.PrimaryKey, null: False, default: option.None),
+    model.BigInt(
+      col: "pk",
+      index: model.PrimaryKey,
+      null: False,
+      default: option.None,
     ),
-    #(
-      "email",
-      model.Text(index: model.Unique, null: False, default: option.None),
+    model.Text(
+      col: "email",
+      index: model.Unique,
+      null: False,
+      default: option.None,
     ),
-    #(
-      "created_on",
-      model.TimestampTz(
-        index: model.Index,
-        null: False,
-        default: option.Some("now()"),
-      ),
+    model.TimestampTz(
+      col: "created_on",
+      index: model.Index,
+      null: False,
+      default: option.Some("now()"),
     ),
-    #(
-      "wants_newsletter",
-      model.Bool(index: model.NoIndex, null: False, default: option.Some(False)),
+    model.Bool(
+      col: "wants_newsletter",
+      index: model.NoIndex,
+      null: False,
+      default: option.Some(False),
     ),
   ],
 )
