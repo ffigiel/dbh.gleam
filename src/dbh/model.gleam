@@ -27,15 +27,13 @@ pub type Index {
 }
 
 // CREATE TABLE
-pub fn serialize(m: Model) -> String {
+pub fn serialize_table(m: Model) -> String {
   let parts = [
     "create table ",
     m.table,
     "\n  ( ",
     serialize_fields(m.fields),
     "\n  );",
-    "\n",
-    serialize_fields_indexes(m),
   ]
   parts
   |> string.join("")
@@ -168,10 +166,9 @@ fn string_not_empty(s: String) -> Bool {
 }
 
 // CREATE INDEX
-fn serialize_fields_indexes(m: Model) -> String {
+pub fn serialize_indexes(m: Model) -> List(String) {
   list.map(m.fields, serialize_field_index(m.table, _))
   |> list.filter(string_not_empty)
-  |> string.join("\n")
 }
 
 fn serialize_field_index(table: String, f: Field) -> String {

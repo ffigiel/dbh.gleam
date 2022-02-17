@@ -1,6 +1,7 @@
 import dbh/model
 import dbh/query
 import gleam/io
+import gleam/list
 import gleam/option
 
 const user = model.Model(
@@ -36,8 +37,12 @@ const user = model.Model(
 pub fn main() {
   io.println("-- create")
   user
-  |> model.serialize
+  |> model.serialize_table
   |> io.println
+  io.println("-- indexes")
+  user
+  |> model.serialize_indexes
+  |> list.each(io.println)
   io.println("-- query")
   let #(query, params) =
     user
