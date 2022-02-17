@@ -43,6 +43,10 @@ pub fn main() {
   user
   |> model.serialize_indexes
   |> list.each(io.println)
+  io.println("-- insert")
+  user
+  |> query.serialize_insert
+  |> io.println
   io.println("-- query")
   let #(query, params) =
     user

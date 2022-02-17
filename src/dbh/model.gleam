@@ -59,7 +59,7 @@ fn serialize_field(f: Field) -> String {
   |> string.join(" ")
 }
 
-fn serialize_field_col(f: Field) -> String {
+pub fn serialize_field_col(f: Field) -> String {
   case f {
     BigInt(_, _, _, col: col) -> col
     Text(_, _, _, col: col) -> col
