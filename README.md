@@ -1,6 +1,11 @@
 # dbh
 
-Experimenting with database models
+Experimenting with modeling database tables
+
+What's possible so far:
+- create table and indexes from a model
+- simple select with nested and/or
+- simple insert
 
 ## Quick start
 
