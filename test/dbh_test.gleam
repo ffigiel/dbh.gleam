@@ -7,6 +7,7 @@ import dbh/model
 import dbh/query
 import gleeunit/should
 import gleam/io
+import gleam/pair
 
 pub fn main() {
   let db = get_db()
@@ -63,36 +64,27 @@ const user = model.Model(
 pub fn insert_select_test() {
   let db = get_db()
   let decode_user = fn(a) {
-    a
-    |> io.debug
-    |> dynamic.tuple4(
-      dynamic.int,
-      dynamic.string,
-      dynamic_datetime,
-      dynamic.bool,
+    dynamic.tuple4(dynamic.int, dynamic.string, dynamic_datetime, dynamic.bool)(
+      a,
     )
   }
-  let sql = query.serialize_insert(user)
-  let res =
-    pgo.execute(
-      sql,
-      db,
-      [
-        pgo.int(42),
-        pgo.text("user1@example.com"),
-        pgo.int(12312),
-        pgo.bool(False),
-      ],
-      decode_user,
-    )
+  let fields = [
+    #("email", pgo.text("user1@example.com")),
+    #("wants_newsletter", pgo.bool(True)),
+  ]
+  let sql = query.serialize_insert(user, list.map(fields, pair.first))
+  let res = pgo.execute(sql, db, list.map(fields, pair.second), decode_user)
   should.be_ok(res)
   assert Ok(res) = res
-  io.debug(res)
   should.equal(res.count, 1)
   assert [user] = res.rows
-  let #(pk, email, _, _) = user
-  should.equal(pk, 42)
+  let #(pk, email, datetime, wants_newsletter) = user
+  should.equal(pk, 1)
   should.equal(email, "user1@example.com")
+  let #(#(year, _, _), _) = datetime
+  should.be_true(year >= 2022)
+  should.be_true(year < 2222)
+  should.equal(wants_newsletter, True)
 }
 
 fn dynamic_datetime(a) {

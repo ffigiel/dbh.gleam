@@ -44,8 +44,7 @@ pub fn main() {
   |> model.serialize_indexes
   |> list.each(io.println)
   io.println("-- insert")
-  user
-  |> query.serialize_insert
+  query.serialize_insert(user, list.map(user.fields, model.serialize_field_col))
   |> io.println
   io.println("-- query")
   let #(query, params) =

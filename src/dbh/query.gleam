@@ -100,18 +100,17 @@ fn serialize_cmp(cmp: Cmp) -> String {
   }
 }
 
-pub fn serialize_insert(m: model.Model) -> String {
-  let field_names = list.map(m.fields, model.serialize_field_col)
+pub fn serialize_insert(m: model.Model, cols: List(String)) -> String {
   let placeholders =
     list.index_map(
-      m.fields,
+      cols,
       fn(i, _) { string.concat(["$", int.to_string(i + 1)]) },
     )
   let parts = [
     "insert into ",
     m.table,
     "\n  (",
-    string.join(field_names, ", "),
+    string.join(cols, ", "),
     ")\nvalues\n  (",
     string.join(placeholders, ", "),
     ")\nreturning *;",
