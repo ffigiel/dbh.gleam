@@ -7,7 +7,6 @@ import dbh/model
 import dbh/query
 import gleeunit/should
 import gleam/io
-import gleam/pair
 
 pub fn main() {
   let db = get_db()
@@ -68,12 +67,13 @@ pub fn insert_select_test() {
       a,
     )
   }
-  let fields = [
-    #("email", pgo.text("user1@example.com")),
-    #("wants_newsletter", pgo.bool(True)),
-  ]
-  let sql = query.serialize_insert(user, list.map(fields, pair.first))
-  let res = pgo.execute(sql, db, list.map(fields, pair.second), decode_user)
+  let #(columns, values) =
+    query.to_columns_and_values([
+      #("email", pgo.text("user1@example.com")),
+      #("wants_newsletter", pgo.bool(True)),
+    ])
+  let sql = query.serialize_insert(user, columns)
+  let res = pgo.execute(sql, db, values, decode_user)
   should.be_ok(res)
   assert Ok(res) = res
   should.equal(res.count, 1)

@@ -2,6 +2,7 @@ import dbh/model
 import gleam/string
 import gleam/list
 import gleam/int
+import gleam/pair
 
 pub type Query {
   Query(model: model.Model, condition: Condition)
@@ -117,4 +118,8 @@ pub fn serialize_insert(m: model.Model, cols: List(String)) -> String {
   ]
   parts
   |> string.concat
+}
+
+pub fn to_columns_and_values(l: List(#(a, b))) -> #(List(a), List(b)) {
+  #(list.map(l, pair.first), list.map(l, pair.second))
 }
