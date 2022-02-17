@@ -2,10 +2,16 @@
 # You typically do not need to edit this file
 
 packages = [
+  { name = "backoff", version = "1.1.6", build_tools = ["rebar3"], requirements = [], otp_app = "backoff", source = "hex", outer_checksum = "CF0CFFF8995FB20562F822E5CC47D8CCF664C5ECDC26A684CBE85C225F9D7C39" },
+  { name = "gleam_pgo", version = "0.2.0", build_tools = ["gleam"], requirements = ["gleam_stdlib", "pgo"], otp_app = "gleam_pgo", source = "hex", outer_checksum = "0470C8C204608615530A0201E28F51D94092A8ADCA3FEAF48D38A75DC6900EAB" },
   { name = "gleam_stdlib", version = "0.19.3", build_tools = ["gleam"], requirements = [], otp_app = "gleam_stdlib", source = "hex", outer_checksum = "CA579C2FF0621E93FF6EFEF61BAFFCF0505732BA073F616E28878042F1A1F401" },
   { name = "gleeunit", version = "0.6.1", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "gleeunit", source = "hex", outer_checksum = "5BF486C3E135B7F5ED8C054925FC48E5B2C79016A39F416FD8CF2E860520EE55" },
+  { name = "pg_types", version = "0.4.0", build_tools = ["rebar3"], requirements = [], otp_app = "pg_types", source = "hex", outer_checksum = "B02EFA785CAECECF9702C681C80A9CA12A39F9161A846CE17B01FB20AEEED7EB" },
+  { name = "pgo", version = "0.11.1", build_tools = ["rebar3"], requirements = ["backoff", "pg_types", "telemetry"], otp_app = "pgo", source = "hex", outer_checksum = "30F38CA823A98C41EF23967D133E91B45AD14AEE0766F4773E88BCCF46BA17A5" },
+  { name = "telemetry", version = "0.4.3", build_tools = ["rebar3"], requirements = [], otp_app = "telemetry", source = "hex", outer_checksum = "EB72B8365FFDA5BED68A620D1DA88525E326CB82A75EE61354FC24B844768041" },
 ]
 
 [requirements]
+gleam_pgo = "~> 0.2"
 gleam_stdlib = "~> 0.19"
 gleeunit = "~> 0.6"
